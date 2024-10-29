@@ -2,7 +2,8 @@ package main
 
 import (
 	"log"
-	dbDriver "github.com/ali-pourmoghadam/mongo-elastic/db_drivers"
+
+	dbDriver "github.com/ali-pourmoghadam/kafka-elastic/db_drivers"
 )
 
 func main() {
@@ -25,8 +26,6 @@ func main() {
 
 	// ############### INDEX DATA INTO DESTINATION DB ################
 
-
 	mongoRepo.FanInConsumer()
-
 
 }
