@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	dbDriver "github.com/ali-pourmoghadam/kafka-elastic/db_drivers"
 	"github.com/segmentio/kafka-go"
+	"github.com/segmentio/kafka-go/sasl/scram"
 )
 
 type KafkaConnect struct {
@@ -17,22 +19,22 @@ type KafkaConnect struct {
 
 func (kc *KafkaConnect) Init() {
 
-	// mechanism, err := scram.Mechanism(scram.SHA256, "username", "password")
-	// if err != nil {
-	// 	panic(err)
-	// }
+	mechanism, err := scram.Mechanism(scram.SHA256, kafkaUsername, kafkaPassword)
+	if err != nil {
+		panic(err)
+	}
 
-	// dialer := &kafka.Dialer{
-	// 	Timeout:       10 * time.Second,
-	// 	DualStack:     true,
-	// 	SASLMechanism: mechanism,
-	// }
+	dialer := &kafka.Dialer{
+		Timeout:       10 * time.Second,
+		DualStack:     true,
+		SASLMechanism: mechanism,
+	}
 
 	kc.kafkaReader = kafka.NewReader(kafka.ReaderConfig{
 		Brokers: []string{partionLeader},
 		Topic:   topic,
 		GroupID: "proccess-read",
-		// Dialer:  dialer,
+		Dialer:  dialer,
 	})
 
 	log.Println("kafka connected")

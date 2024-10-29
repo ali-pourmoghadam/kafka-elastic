@@ -6,9 +6,9 @@ var topic = os.Getenv("TOPIC_NAME")
 
 var partionLeader = os.Getenv("KAFKA_ADDR")
 
-// var kafkaUsername = os.Getenv("KAFKA_USERNAME")
+var kafkaUsername = os.Getenv("KAFKA_USERNAME")
 
-// var kafkaPassword = os.Getenv("KAFKA_PASSWORD")
+var kafkaPassword = os.Getenv("KAFKA_PASSWORD")
 
 type SourceInterface interface {
 	Init()

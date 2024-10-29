@@ -27,14 +27,15 @@ ENV ELASTIC_USERNAME="elastic"
 ENV ELASTIC_PASSWORD="123"
 ENV TOPIC_NAME="message-log"
 ENV KAFKA_ADDR="localhost:9092"
+ENV KAFKA_USERNAME="username"
+ENV KAFKA_PASSWORD="password"
 
 
 
-# Ensure the binary has execute permissions
+
 RUN chmod +x myapp
 
-# Confirm the presence of the binary
 RUN ls -lah ./myapp
 
-# Command to run the executable
-CMD ["sh", "-c", "while true; do ./myapp; sleep 2; done"]
+
+CMD ["./myapp"]
