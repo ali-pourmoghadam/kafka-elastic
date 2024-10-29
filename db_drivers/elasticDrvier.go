@@ -19,6 +19,15 @@ type ElasticDriver struct {
 	client *elasticsearch.Client
 }
 
+// type externalMsg struct {
+// 	Collector string `json:"Collector"`
+// 	Timestamp string `json:"Timestamp"`
+// 	Source    string `json:"Source"`
+// 	Hostname  string `json:"Hostname"`
+// 	IP        string `json:"IP"`
+// 	Log       string `json:"Log"`
+// }
+
 func (el *ElasticDriver) Connect() {
 
 	tlsConfig := &tls.Config{
@@ -60,6 +69,7 @@ func (el *ElasticDriver) Connect() {
 	log.Println("Connected to Elasticsearch:", res.Status())
 
 	el.setupStreamProcessIndex()
+	el.setupStreamProcessIndexExternal()
 
 }
 
@@ -67,7 +77,7 @@ func (el *ElasticDriver) Write(dbanme string, data interface{}) {
 
 	log.Println("ElasticDriver write")
 
-	jsonData, err := el.purgeIdBson(data)
+	jsonData, err := el.normalized(data)
 
 	if err != nil {
 
@@ -190,7 +200,54 @@ func (el *ElasticDriver) setupStreamProcessIndex() {
 
 	log.Printf("checkRes %v:", checkRes)
 
-	if checkRes ==false{
+	if !checkRes {
+		log.Printf("Skipping index setup for logs as it already exists.")
+		return
+	}
+
+	streamProcessIndex := `{
+        "settings": {
+            "number_of_shards": 2,
+            "number_of_replicas": 3
+        },
+        "mappings": {
+            "properties": {
+                "Collector": {
+                    "type": "keyword"
+                },
+                "Timestamp": {
+                    "type": "date"
+                },
+                "Source": {
+                    "type": "text"
+                },
+                "Hostname": {
+                    "type": "keyword"
+                },
+                "IP": {
+                    "type": "ip"
+                },
+                "Log": {
+                    "type": "text"
+                }
+            }
+        }
+    }`
+
+	err := el.createIndex(elasticIndexName, streamProcessIndex)
+
+	if err != nil {
+		log.Fatalf("Error creating logs index: %s", err)
+	}
+}
+
+func (el *ElasticDriver) setupStreamProcessIndexExternal() {
+
+	checkRes := el.checkIndexExists(elasticIndexNameExternal)
+
+	log.Printf("checkRes %v:", checkRes)
+
+	if !checkRes {
 		log.Printf("Skipping index setup for logs as it already exists.")
 		return
 	}
@@ -224,16 +281,23 @@ func (el *ElasticDriver) setupStreamProcessIndex() {
         }
     }`
 
-	err := el.createIndex(elasticIndexName, streamProcessIndex)
+	err := el.createIndex(elasticIndexNameExternal, streamProcessIndex)
 
 	if err != nil {
 		log.Fatalf("Error creating logs index: %s", err)
 	}
 }
 
-func (el *ElasticDriver) purgeIdBson(data interface{}) ([]byte, error) {
+func (el *ElasticDriver) normalized(data interface{}) ([]byte, error) {
 
-	document, _ := data.(bson.M)
+	document, isBson := data.(bson.M)
+
+	if !isBson {
+
+		log.Println("input data is not of type bson.M")
+
+		return data.([]byte), nil
+	}
 
 	_, ok := document["_id"].(primitive.ObjectID)
 

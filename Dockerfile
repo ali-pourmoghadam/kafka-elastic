@@ -20,10 +20,13 @@ RUN go build -o myapp ./cmd/main.go && ls -lah myapp
 ENV MONGO_URI="mongodb://localhost:27017"
 ENV DB_NAME="mydatabase"
 ENV COLLECTION="mycollection"
-ENV INDEX_NAME="myindex"
+ENV INDEX_NAME="Myindex"
+ENV INDEX_NAME_EXTERNAL="externalindex"
 ENV ELASTIC_ADDR="https://localhost:9200"
 ENV ELASTIC_USERNAME="elastic"
 ENV ELASTIC_PASSWORD="123"
+ENV TOPIC_NAME="message-log"
+ENV KAFKA_ADDR="localhost:9092"
 
 
 

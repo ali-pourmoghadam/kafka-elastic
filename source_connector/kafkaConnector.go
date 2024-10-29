@@ -4,47 +4,47 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"time"
+	"os"
 
+	dbDriver "github.com/ali-pourmoghadam/kafka-elastic/db_drivers"
 	"github.com/segmentio/kafka-go"
-	"github.com/segmentio/kafka-go/sasl/scram"
 )
 
 type KafkaConnect struct {
 	kafkaReader *kafka.Reader
+	Target      dbDriver.DbDriver
 }
-
-var ctx = context.Background()
 
 func (kc *KafkaConnect) Init() {
 
-	mechanism, err := scram.Mechanism(scram.SHA256, "username", "password")
-	if err != nil {
-		panic(err)
-	}
+	// mechanism, err := scram.Mechanism(scram.SHA256, "username", "password")
+	// if err != nil {
+	// 	panic(err)
+	// }
 
-	dialer := &kafka.Dialer{
-		Timeout:       10 * time.Second,
-		DualStack:     true,
-		SASLMechanism: mechanism,
-	}
+	// dialer := &kafka.Dialer{
+	// 	Timeout:       10 * time.Second,
+	// 	DualStack:     true,
+	// 	SASLMechanism: mechanism,
+	// }
 
 	kc.kafkaReader = kafka.NewReader(kafka.ReaderConfig{
 		Brokers: []string{partionLeader},
 		Topic:   topic,
 		GroupID: "proccess-read",
-		Dialer:  dialer,
+		// Dialer:  dialer,
 	})
 
+	log.Println("kafka connected")
 }
 
 func (kc *KafkaConnect) Connect() {
 
-	go kc.read()
+	kc.Read()
 
 }
 
-func (kc *KafkaConnect) read() {
+func (kc *KafkaConnect) Read() {
 
 	for {
 		// Read a message from the topic
@@ -56,6 +56,8 @@ func (kc *KafkaConnect) read() {
 
 		// Print the message value
 		fmt.Printf("Message received: %s\n", string(msg.Value))
+
+		kc.Target.Write(os.Getenv("INDEX_NAME_EXTERNAL"), msg.Value)
 	}
 
 }

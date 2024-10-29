@@ -14,13 +14,14 @@ var (
 )
 
 var (
-	mongoURI         = os.Getenv("MONGO_URI")
-	databaseName     = os.Getenv("DB_NAME")
-	mongoCollection  = os.Getenv("COLLECTION")
-	elasticIndexName = os.Getenv("INDEX_NAME")
-	elasticAddress   = os.Getenv("ELASTIC_ADDR")
-	elasticUsername   = os.Getenv("ELASTIC_USERNAME")
-	elasticPassword   = os.Getenv("ELASTIC_PASSWORD")
+	mongoURI                 = os.Getenv("MONGO_URI")
+	databaseName             = os.Getenv("DB_NAME")
+	mongoCollection          = os.Getenv("COLLECTION")
+	elasticIndexName         = os.Getenv("INDEX_NAME")
+	elasticIndexNameExternal = os.Getenv("INDEX_NAME_EXTERNAL")
+	elasticAddress           = os.Getenv("ELASTIC_ADDR")
+	elasticUsername          = os.Getenv("ELASTIC_USERNAME")
+	elasticPassword          = os.Getenv("ELASTIC_PASSWORD")
 )
 
 type DbDriver interface {
